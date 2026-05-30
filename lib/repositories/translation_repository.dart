@@ -12,6 +12,7 @@ class TranslationRepository {
 
   TranslationRequest? _pendingRequest;
   TranslationResult? _currentResult;
+  String? lastErrorMessage;
 
   TranslationRequest? get pendingRequest => _pendingRequest;
   TranslationResult? get currentResult => _currentResult;

@@ -1,5 +1,7 @@
+import 'dart:typed_data';
+
 class TranslationRequest {
-  final List<int> fileBytes;
+  final Uint8List fileBytes;
   final String mimeType;
   final String sourceLanguage;
   final String targetLanguage;

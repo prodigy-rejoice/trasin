@@ -10,17 +10,26 @@ class ProcessingViewModel extends BaseViewModel {
   final _repository = locator<TranslationRepository>();
   final _navigationService = locator<NavigationService>();
 
+  static const _unreadableDocumentMessage =
+      "We couldn't read this document. Please try a clearer image or a text-based PDF.";
+
   Future<void> startTranslation() async {
     _log.i('Processing translation request');
     setBusy(true);
 
     try {
-      await _repository.translate();
+      final result = await _repository.translate();
+      if (result.translatedText.trim().length < 10) {
+        _log.w('Translation too short — treating as unreadable');
+        _repository.lastErrorMessage = _unreadableDocumentMessage;
+        await _navigationService.replaceWith(Routes.uploadView);
+        return;
+      }
       _log.i('Translation complete — navigating to result');
       await _navigationService.replaceWith(Routes.resultView);
     } catch (e) {
       _log.e('Translation failed', error: e);
-      await Future.delayed(const Duration(seconds: 2));
+      _repository.lastErrorMessage = _unreadableDocumentMessage;
       await _navigationService.replaceWith(Routes.uploadView);
     } finally {
       setBusy(false);
