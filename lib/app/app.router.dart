@@ -10,9 +10,9 @@ import 'package:flutter/material.dart' as _i5;
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart' as _i1;
 import 'package:stacked_services/stacked_services.dart' as _i6;
-import 'package:trasin/views/processing/processing_view.dart' as _i3;
-import 'package:trasin/views/result/result_view.dart' as _i4;
-import 'package:trasin/views/upload/upload_view.dart' as _i2;
+import 'package:trasin/screens/processing/processing_view.dart' as _i3;
+import 'package:trasin/screens/result/result_view.dart' as _i4;
+import 'package:trasin/screens/upload/upload_view.dart' as _i2;
 
 class Routes {
   static const uploadView = '/';
