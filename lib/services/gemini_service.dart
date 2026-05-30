@@ -23,7 +23,7 @@ class GeminiService {
 
     final response = await _model!.generateContent([
       Content.multi([
-        InlineDataPart(request.mimeType, Uint8List.fromList(request.fileBytes)),
+        InlineDataPart(request.mimeType, request.fileBytes),
         TextPart(userMessage),
       ]),
     ]);
