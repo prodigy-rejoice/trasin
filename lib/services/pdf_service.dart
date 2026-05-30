@@ -33,25 +33,51 @@ class PdfService {
 
     final pdf = pw.Document(theme: theme);
 
+    final subtitleText = _sanitizeForPdf(_buildSubtitle(result));
+    final paragraphs = _splitIntoParagraphs(result.translatedText);
+
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
         theme: theme,
+        margin: const pw.EdgeInsets.all(60),
         textDirection: textDirection,
-        header: (context) => _buildHeader(result, regular, bold),
-        footer: (context) => _buildFooter(context, regular),
-        build: (context) => [
-          pw.SizedBox(height: 20),
-          for (final paragraph in _splitIntoParagraphs(result.translatedText))
-            pw.Padding(
-              padding: const pw.EdgeInsets.only(bottom: 10),
-              child: pw.Text(
-                paragraph,
-                style: pw.TextStyle(font: regular, fontSize: 12),
-                textDirection: textDirection,
+        build: (context) {
+          final widgets = <pw.Widget>[
+            pw.Text(
+              subtitleText,
+              style: pw.TextStyle(
+                font: regular,
+                fontSize: 9,
+                color: PdfColors.grey500,
               ),
+              textDirection: textDirection,
             ),
-        ],
+            pw.SizedBox(height: 28),
+          ];
+          for (var i = 0; i < paragraphs.length; i++) {
+            final paragraph = paragraphs[i];
+            final isTitle = _isTitleLine(paragraph, isFirstLine: i == 0);
+            widgets.add(
+              pw.Padding(
+                padding: const pw.EdgeInsets.only(bottom: 14),
+                child: pw.Text(
+                  paragraph,
+                  style: pw.TextStyle(
+                    font: isTitle ? bold : regular,
+                    fontWeight: isTitle
+                        ? pw.FontWeight.bold
+                        : pw.FontWeight.normal,
+                    fontSize: 12,
+                    lineSpacing: 4,
+                  ),
+                  textDirection: textDirection,
+                ),
+              ),
+            );
+          }
+          return widgets;
+        },
       ),
     );
 
@@ -60,59 +86,26 @@ class PdfService {
     _log.i('PDF download triggered');
   }
 
-  pw.Widget _buildHeader(
-    TranslationResult result,
-    pw.Font regular,
-    pw.Font bold,
-  ) {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-          children: [
-            pw.Text(
-              'Trasin',
-              style: pw.TextStyle(
-                font: bold,
-                fontSize: 18,
-                fontWeight: pw.FontWeight.bold,
-                color: const PdfColor.fromInt(0xFF1A56DB),
-              ),
-            ),
-            pw.Text(
-              _sanitizeForPdf(
-                  '${result.sourceLanguage} → ${result.targetLanguage}'),
-              style: pw.TextStyle(
-                font: regular,
-                fontSize: 10,
-                color: PdfColors.grey600,
-              ),
-            ),
-          ],
-        ),
-        pw.Divider(color: PdfColors.grey300),
-      ],
-    );
-  }
-
-  pw.Widget _buildFooter(pw.Context context, pw.Font regular) {
-    return pw.Row(
-      mainAxisAlignment: pw.MainAxisAlignment.end,
-      children: [
-        pw.Text(
-          'Page ${context.pageNumber} of ${context.pagesCount}',
-          style: pw.TextStyle(
-            font: regular,
-            fontSize: 9,
-            color: PdfColors.grey500,
-          ),
-        ),
-      ],
-    );
-  }
-
   bool _isRtlLanguage(String language) => language == 'Arabic';
+
+  String _buildSubtitle(TranslationResult result) {
+    final source = result.sourceLanguage;
+    final detected = result.detectedSourceLanguage;
+    final sourceText = source == 'Auto-detect' && detected != null
+        ? 'Auto-detect ($detected)'
+        : source;
+    return 'Translated from $sourceText to ${result.targetLanguage}';
+  }
+
+  bool _isTitleLine(String line, {required bool isFirstLine}) {
+    final trimmed = line.trim();
+    if (trimmed.isEmpty) return false;
+    if (isFirstLine) return true;
+    if (trimmed.length > 50) return false;
+    final lastChar = trimmed.substring(trimmed.length - 1);
+    if (const ['.', ',', '!', '?', ';'].contains(lastChar)) return false;
+    return true;
+  }
 
   List<String> _splitIntoParagraphs(String text) {
     final chunks = text

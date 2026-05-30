@@ -16,41 +16,85 @@ class ProcessingView extends StackedView<ProcessingViewModel> {
   ) {
     final textStyle =
         AppTextStyles.body.copyWith(color: AppTheme.textSecondary);
+    final rateLimitMessage = viewModel.rateLimitMessage;
     return Scaffold(
       backgroundColor: AppTheme.background,
       body: Center(
-        child: Column(
+        child: rateLimitMessage != null
+            ? _buildRateLimitState(rateLimitMessage, viewModel, textStyle)
+            : _buildProcessingState(textStyle),
+      ),
+    );
+  }
+
+  Widget _buildProcessingState(TextStyle textStyle) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const SizedBox(
+          width: 48,
+          height: 48,
+          child: CircularProgressIndicator(
+            color: AppTheme.primary,
+            strokeWidth: 3,
+          ),
+        ).animate().fadeIn(duration: 300.ms),
+        const SizedBox(height: 32),
+        Row(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const SizedBox(
-              width: 48,
-              height: 48,
-              child: CircularProgressIndicator(
-                color: AppTheme.primary,
-                strokeWidth: 3,
-              ),
-            ).animate().fadeIn(duration: 300.ms),
-            const SizedBox(height: 32),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Reading and translating your document',
-                  style: textStyle,
-                  textAlign: TextAlign.center,
-                ),
-                _AnimatedEllipsis(style: textStyle),
-              ],
+            Text(
+              'Reading and translating your document',
+              style: textStyle,
+              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 48),
-            const TrasinLogo(fontSize: 18),
+            _AnimatedEllipsis(style: textStyle),
           ],
-        )
-            .animate()
-            .fadeIn(duration: 350.ms)
-            .slideY(begin: 0.15, end: 0, duration: 350.ms),
-      ),
+        ),
+        const SizedBox(height: 48),
+        const TrasinLogo(fontSize: 18),
+      ],
+    )
+        .animate()
+        .fadeIn(duration: 350.ms)
+        .slideY(begin: 0.15, end: 0, duration: 350.ms);
+  }
+
+  Widget _buildRateLimitState(
+    String message,
+    ProcessingViewModel viewModel,
+    TextStyle textStyle,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.hourglass_top_outlined,
+            color: AppTheme.primary,
+            size: 48,
+          ),
+          const SizedBox(height: 24),
+          Text(
+            message,
+            style: textStyle,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 32),
+          ElevatedButton(
+            onPressed: viewModel.goToUpload,
+            style: AppButtonStyles.primary,
+            child: const Text('Try Again'),
+          ),
+          const SizedBox(height: 48),
+          const TrasinLogo(fontSize: 18),
+        ],
+      )
+          .animate()
+          .fadeIn(duration: 350.ms)
+          .slideY(begin: 0.15, end: 0, duration: 350.ms),
     );
   }
 
