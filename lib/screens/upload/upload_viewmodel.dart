@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
@@ -13,7 +15,7 @@ class UploadViewModel extends BaseViewModel {
   final _repository = locator<TranslationRepository>();
   final _navigationService = locator<NavigationService>();
 
-  List<int>? _selectedFileBytes;
+  Uint8List? _selectedFileBytes;
   String? _selectedFileName;
   String? _selectedMimeType;
   String _sourceLanguage = 'Auto-detect';
@@ -52,17 +54,61 @@ class UploadViewModel extends BaseViewModel {
       return;
     }
 
-    if (file.size > kMaxFileSizeBytes) {
+    _acceptFile(
+      bytes: file.bytes!,
+      fileName: file.name,
+      extension: file.extension ?? '',
+      sizeBytes: file.size,
+    );
+  }
+
+  void acceptDroppedFile(Uint8List bytes, String fileName) {
+    _log.i('File dropped: $fileName (${bytes.length} bytes)');
+    final extension = fileName.contains('.') ? fileName.split('.').last : '';
+    _acceptFile(
+      bytes: bytes,
+      fileName: fileName,
+      extension: extension,
+      sizeBytes: bytes.length,
+    );
+  }
+
+  void _acceptFile({
+    required Uint8List bytes,
+    required String fileName,
+    required String extension,
+    required int sizeBytes,
+  }) {
+    if (!kAllowedExtensions.contains(extension.toLowerCase())) {
+      setError('Unsupported file type. Please use a PDF, JPG, or PNG.');
+      return;
+    }
+
+    if (sizeBytes > kMaxFileSizeBytes) {
       setError('This file is too large. Please use a file under 10MB.');
       return;
     }
 
     clearErrors();
-    _selectedFileBytes = file.bytes!.toList();
-    _selectedFileName = file.name;
-    _selectedMimeType = _mimeTypeFromExtension(file.extension ?? '');
-    _log.i('File selected: ${file.name} (${file.size} bytes)');
+    _selectedFileBytes = bytes;
+    _selectedFileName = fileName;
+    _selectedMimeType = _mimeTypeFromExtension(extension);
+    _log.i('File accepted: $fileName ($sizeBytes bytes)');
     notifyListeners();
+  }
+
+  static const _validMimeTypes = {
+    'application/pdf',
+    'image/jpeg',
+    'image/png',
+  };
+
+  void init() {
+    final pendingError = _repository.lastErrorMessage;
+    if (pendingError != null) {
+      setError(pendingError);
+      _repository.lastErrorMessage = null;
+    }
   }
 
   Future<void> startTranslation() async {
@@ -73,6 +119,11 @@ class UploadViewModel extends BaseViewModel {
 
     if (_targetLanguage == 'Auto-detect') {
       setError('Please select a target language.');
+      return;
+    }
+
+    if (!_validMimeTypes.contains(_selectedMimeType)) {
+      setError('Unsupported file format. Please upload a PDF, JPG, or PNG.');
       return;
     }
 

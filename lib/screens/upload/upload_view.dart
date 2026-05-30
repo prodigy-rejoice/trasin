@@ -39,6 +39,7 @@ class UploadView extends StackedView<UploadViewModel> {
                   UploadZone(
                     fileName: viewModel.selectedFileName,
                     onTap: viewModel.pickFile,
+                    onFileDropped: viewModel.acceptDroppedFile,
                   ),
                   const SizedBox(height: 24),
                   Row(
@@ -118,4 +119,7 @@ class UploadView extends StackedView<UploadViewModel> {
 
   @override
   UploadViewModel viewModelBuilder(BuildContext context) => UploadViewModel();
+
+  @override
+  void onViewModelReady(UploadViewModel viewModel) => viewModel.init();
 }
