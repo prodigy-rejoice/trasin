@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:stacked/stacked.dart';
 import '../../core/constants.dart';
 import '../../core/theme.dart';
@@ -66,7 +67,7 @@ class UploadView extends StackedView<UploadViewModel> {
                         ),
                       ),
                     ],
-                  ),
+                  ).animate().fadeIn(delay: 150.ms, duration: 300.ms),
                   if (viewModel.hasError) ...[
                     const SizedBox(height: 12),
                     Row(
@@ -100,7 +101,10 @@ class UploadView extends StackedView<UploadViewModel> {
                             ),
                           )
                         : const Text('Translate'),
-                  ),
+                  )
+                      .animate()
+                      .fadeIn(delay: 100.ms, duration: 350.ms)
+                      .slideY(begin: 0.25, end: 0, duration: 350.ms),
                   const SizedBox(height: 16),
                   Center(
                     child: Text(

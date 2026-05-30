@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../core/theme.dart';
 
 class UploadZone extends StatefulWidget {
@@ -48,13 +49,17 @@ class _UploadZoneState extends State<UploadZone> {
         onExit: (_) => setState(() => _isHovered = false),
         child: GestureDetector(
           onTap: widget.onTap,
-          child: DottedBorder(
+          child: _animatedZone(
+            hasFile: hasFile,
+            child: DottedBorder(
             borderType: BorderType.RRect,
             radius: const Radius.circular(12),
             color: highlight ? AppTheme.primary : AppTheme.border,
             strokeWidth: 1.5,
             dashPattern: const [8, 4],
-            child: Container(
+            child: AnimatedContainer(
+              duration: 300.ms,
+              curve: Curves.easeOut,
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
               decoration: BoxDecoration(
@@ -107,8 +112,23 @@ class _UploadZoneState extends State<UploadZone> {
               ),
             ),
           ),
+          ),
         ),
       ),
     );
+  }
+
+  Widget _animatedZone({required bool hasFile, required Widget child}) {
+    if (hasFile) {
+      return child.animate().scaleXY(
+            begin: 1.0,
+            end: 1.02,
+            duration: 300.ms,
+            curve: Curves.easeOut,
+          );
+    }
+    return child
+        .animate(onPlay: (c) => c.repeat(reverse: true))
+        .scaleXY(begin: 1.0, end: 1.005, duration: 400.ms);
   }
 }

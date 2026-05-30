@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:stacked/stacked.dart';
 import '../../core/theme.dart';
 import 'result_viewmodel.dart';
@@ -76,7 +77,10 @@ class ResultView extends StackedView<ResultViewModel> {
                         ),
                       ],
                     ),
-                  ),
+                  )
+                      .animate()
+                      .fadeIn(duration: 350.ms)
+                      .slideY(begin: 0.15, end: 0, duration: 350.ms),
                   if (viewModel.hasError) ...[
                     const SizedBox(height: 12),
                     Row(
@@ -110,7 +114,16 @@ class ResultView extends StackedView<ResultViewModel> {
                           )
                         : const Icon(Icons.download_outlined, size: 18),
                     label: const Text('Download PDF'),
-                  ),
+                  )
+                      .animate()
+                      .fadeIn(delay: 350.ms, duration: 300.ms)
+                      .scaleXY(
+                        begin: 0.9,
+                        end: 1.0,
+                        delay: 350.ms,
+                        duration: 400.ms,
+                        curve: Curves.easeOutBack,
+                      ),
                   const SizedBox(height: 12),
                   Center(
                     child: TextButton(
@@ -121,7 +134,7 @@ class ResultView extends StackedView<ResultViewModel> {
                             .copyWith(color: AppTheme.primary),
                       ),
                     ),
-                  ),
+                  ).animate().fadeIn(delay: 750.ms, duration: 300.ms),
                 ],
               ),
             ),
