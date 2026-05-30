@@ -29,11 +29,15 @@ class TranslationRepository {
 
     _log.i('Starting translation: ${request.fileName}');
 
-    final translatedText = await _geminiService.translateDocument(request);
+    final translation = await _geminiService.translateDocument(request);
 
     _currentResult = TranslationResult(
-      translatedText: translatedText,
+      translatedText: translation.translatedText,
       sourceLanguage: request.sourceLanguage,
+      detectedSourceLanguage:
+          translation.detectedSourceLanguage.isEmpty
+              ? null
+              : translation.detectedSourceLanguage,
       targetLanguage: request.targetLanguage,
       fileName: request.fileName,
     );
