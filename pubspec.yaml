@@ -89,6 +89,9 @@ flutter:
   assets:
     - assets/system_prompt.md
     - assets/system_prompt.example.md
+    - assets/fonts/Noto_Sans/NotoSans-Regular.ttf
+    - assets/fonts/Noto_Sans/NotoSans-Bold.ttf
+    - assets/fonts/Noto_Sans_Symbols_2/NotoSansSymbols2-Regular.ttf
 
   # To add assets to your application, add an assets section, like this:
   # assets:
